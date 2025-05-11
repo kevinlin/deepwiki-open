@@ -8,7 +8,8 @@
     "submit": "送信",
     "cancel": "キャンセル",
     "close": "閉じる",
-    "loading": "読み込み中..."
+    "loading": "読み込み中...",
+    "refresh": "更新"
   },
   "loading": {
     "initializing": "Wiki生成を初期化中...",
@@ -25,7 +26,12 @@
     "advancedVisualization": "Mermaidダイアグラムによる高度な可視化",
     "diagramDescription": "DeepWikiは、コード構造と関係を理解するのに役立つインタラクティブな図を自動的に生成します：",
     "flowDiagram": "フロー図",
-    "sequenceDiagram": "シーケンス図"
+    "sequenceDiagram": "シーケンス図",
+    "localRepos": "ローカルリポジトリ",
+    "availableRepos": "利用可能なリポジトリ",
+    "noLocalRepos": "ローカルリポジトリが見つかりません",
+    "localReposDescription": "これらはDeepWikiで処理され、あなたのマシンにローカルに保存されたリポジトリです。リポジトリをクリックするとドキュメントが表示されます。",
+    "files": "ファイル"
   },
   "form": {
     "repoPlaceholder": "所有者/リポジトリまたはGitHub/GitLab/BitbucketのURL",
@@ -63,7 +69,6 @@
     "excludedFilesHelp": "一行につき一つのファイル名。ワイルドカード(*)が使用可能です。",
     "defaultFilters": "デフォルトで除外されるファイルとディレクトリ",
     "directories": "ディレクトリ",
-    "files": "ファイル",
     "scrollToViewMore": "スクロールしてさらに表示",
     "changeModel": "モデルを変更",
     "defaultNote": "これらのデフォルト設定は既に適用されています。上記に追加の除外項目を入力してください。",
@@ -71,7 +76,9 @@
     "viewDefault": "デフォルトを表示"
   },
   "footer": {
-    "copyright": "DeepWiki - コードリポジトリのためのAI駆動ドキュメンテーション"
+    "copyright": "DeepWiki - コードリポジトリのためのAI駆動ドキュメンテーション",
+    "showFooter": "フッターを表示",
+    "hideFooter": "フッターを隠す"
   },
   "ask": {
     "placeholder": "このリポジトリについて質問する...",

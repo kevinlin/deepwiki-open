@@ -8,7 +8,8 @@
     "submit": "Submit",
     "cancel": "Cancel",
     "close": "Close",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "refresh": "Refresh"
   },
   "loading": {
     "initializing": "Initializing wiki generation...",
@@ -26,7 +27,12 @@
     "advancedVisualization": "Advanced Visualization with Mermaid Diagrams",
     "diagramDescription": "DeepWiki automatically generates interactive diagrams to help you understand code structure and relationships:",
     "flowDiagram": "Flow Diagram",
-    "sequenceDiagram": "Sequence Diagram"
+    "sequenceDiagram": "Sequence Diagram",
+    "localRepos": "Local Repositories",
+    "availableRepos": "Available Repositories",
+    "noLocalRepos": "No local repositories found",
+    "localReposDescription": "These are repositories processed by DeepWiki and stored locally on your machine. Click on a repository to view its documentation.",
+    "files": "files"
   },
   "form": {
     "repoPlaceholder": "owner/repo or GitHub/GitLab/Bitbucket URL",
@@ -64,7 +70,6 @@
     "excludedFilesHelp": "One filename per line. Wildcards (*) are supported.",
     "defaultFilters": "Default Excluded Files & Directories",
     "directories": "Directories",
-    "files": "Files",
     "scrollToViewMore": "Scroll to view more",
     "changeModel": "Change Model",
     "defaultNote": "These defaults are already applied. Add your custom exclusions above.",
@@ -72,7 +77,9 @@
     "viewDefault": "View Default"
   },
   "footer": {
-    "copyright": "DeepWiki - AI-powered documentation for code repositories"
+    "copyright": "DeepWiki - AI-powered documentation for code repositories",
+    "showFooter": "Show footer",
+    "hideFooter": "Hide footer"
   },
   "ask": {
     "placeholder": "Ask a question about this repository...",

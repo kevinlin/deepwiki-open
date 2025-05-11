@@ -7,6 +7,7 @@ import { FaWikipediaW, FaGithub, FaGitlab, FaBitbucket, FaCoffee, FaTwitter} fro
 import ThemeToggle from '@/components/theme-toggle';
 import Mermaid from '../components/Mermaid';
 import UserSelector from '@/components/UserSelector';
+import LocalReposDropdown from '@/components/LocalReposDropdown';
 
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -87,6 +88,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>(language);
+  const [showFooter, setShowFooter] = useState(false);
 
   // Sync the language context with the selectedLanguage state
   useEffect(() => {
@@ -271,7 +273,7 @@ export default function Home() {
           <form onSubmit={handleFormSubmit} className="flex flex-col gap-3 w-full max-w-3xl">
             {/* Repository URL input and submit button */}
             <div className="flex flex-col sm:flex-row gap-2">
-                <div className="relative flex-1">
+              <div className="relative flex-1">
                 <input
                   type="text"
                   value={repositoryInput}
@@ -285,13 +287,15 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <button
-                type="submit"
-                className="btn-japanese px-6 py-2.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? t('common.processing') : t('common.generateWiki')}
-              </button>
+              <div className="flex">
+                <button
+                  type="submit"
+                  className="btn-japanese px-6 py-2.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? t('common.processing') : t('common.generateWiki')}
+                </button>
+              </div>
             </div>
 
             {/* Advanced options section with improved layout */}
@@ -471,6 +475,11 @@ export default function Home() {
             <p className="text-[var(--foreground)] text-center mb-8 text-lg leading-relaxed">
               {t('home.description')}
             </p>
+
+            {/* Local Repositories Section */}
+            <div className="w-full max-w-2xl mb-8">
+              <LocalReposDropdown t={t} />
+            </div>
           </div>
 
           {/* Quick Start section - redesigned for better spacing */}
@@ -538,28 +547,56 @@ export default function Home() {
       </main>
 
       <footer className="max-w-6xl mx-auto mt-8 flex flex-col gap-4 w-full">
-        <div
-          className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[var(--card-bg)] rounded-lg p-4 border border-[var(--border-color)] shadow-custom">
-          <p className="text-[var(--muted)] text-sm font-serif">{t('footer.copyright')}</p>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center space-x-5">
-              <a href="https://github.com/AsyncFuncAI/deepwiki-open" target="_blank" rel="noopener noreferrer"
-                 className="text-[var(--muted)] hover:text-[var(--accent-primary)] transition-colors">
-                <FaGithub className="text-xl"/>
-              </a>
-              <a href="https://buymeacoffee.com/sheing" target="_blank" rel="noopener noreferrer"
-                 className="text-[var(--muted)] hover:text-[var(--accent-primary)] transition-colors">
-                <FaCoffee className="text-xl"/>
-              </a>
-              <a href="https://x.com/sashimikun_void" target="_blank" rel="noopener noreferrer"
-                 className="text-[var(--muted)] hover:text-[var(--accent-primary)] transition-colors">
-                <FaTwitter className="text-xl"/>
-              </a>
-            </div>
-            <ThemeToggle/>
-          </div>
+        <div className="flex justify-end">
+          <button 
+            onClick={() => setShowFooter(!showFooter)} 
+            className="text-xs text-[var(--muted)] hover:text-[var(--accent-primary)] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--card-bg)] border border-[var(--border-color)] shadow-sm transition-colors hover:border-[var(--accent-primary)]/30 fixed bottom-4 right-4 z-10"
+            aria-expanded={showFooter}
+            aria-label={showFooter ? t('footer.hideFooter') : t('footer.showFooter')}
+          >
+            {showFooter ? t('footer.hideFooter') : t('footer.showFooter')}
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="12" 
+              height="12" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className={`transition-transform duration-300 ${showFooter ? 'rotate-180' : ''}`}
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
         </div>
+        
+        {showFooter && (
+          <div
+            className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[var(--card-bg)] rounded-lg p-4 border border-[var(--border-color)] shadow-custom animate-fadeIn"
+          >
+            <p className="text-[var(--muted)] text-sm font-serif">{t('footer.copyright')}</p>
+
+            <div className="flex items-center gap-6">
+              <div className="flex items-center space-x-5">
+                <a href="https://github.com/AsyncFuncAI/deepwiki-open" target="_blank" rel="noopener noreferrer"
+                  className="text-[var(--muted)] hover:text-[var(--accent-primary)] transition-colors">
+                  <FaGithub className="text-xl"/>
+                </a>
+                <a href="https://buymeacoffee.com/sheing" target="_blank" rel="noopener noreferrer"
+                  className="text-[var(--muted)] hover:text-[var(--accent-primary)] transition-colors">
+                  <FaCoffee className="text-xl"/>
+                </a>
+                <a href="https://x.com/sashimikun_void" target="_blank" rel="noopener noreferrer"
+                  className="text-[var(--muted)] hover:text-[var(--accent-primary)] transition-colors">
+                  <FaTwitter className="text-xl"/>
+                </a>
+              </div>
+              <ThemeToggle/>
+            </div>
+          </div>
+        )}
       </footer>
     </div>
   );

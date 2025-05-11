@@ -8,7 +8,8 @@
     "submit": "提交",
     "cancel": "取消",
     "close": "关闭",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "refresh": "刷新"
   },
   "loading": {
     "initializing": "初始化Wiki生成...",
@@ -25,7 +26,12 @@
     "advancedVisualization": "使用Mermaid图表进行高级可视化",
     "diagramDescription": "DeepWiki自动生成交互式图表，帮助您理解代码结构和关系：",
     "flowDiagram": "流程图",
-    "sequenceDiagram": "序列图"
+    "sequenceDiagram": "序列图",
+    "localRepos": "本地仓库",
+    "availableRepos": "可用仓库",
+    "noLocalRepos": "未找到本地仓库",
+    "localReposDescription": "这些是由DeepWiki处理并存储在您机器本地的仓库。点击仓库查看其文档。",
+    "files": "文件"
   },
   "form": {
     "repoPlaceholder": "所有者/仓库或GitHub/GitLab/Bitbucket URL",
@@ -63,7 +69,6 @@
     "excludedFilesHelp": "每行一个文件名。支持通配符(*)。",
     "defaultFilters": "默认排除的文件和目录",
     "directories": "目录",
-    "files": "文件",
     "scrollToViewMore": "可滑动查看更多",
     "changeModel": "修改模型",
     "defaultNote": "这些默认配置已经被应用。请在上方添加您的自定义排除项。",

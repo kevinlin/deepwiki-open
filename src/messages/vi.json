@@ -8,7 +8,8 @@
     "submit": "Gửi",
     "cancel": "Hủy",
     "close": "Đóng",
-    "loading": "Đang tải..."
+    "loading": "Đang tải...",
+    "refresh": "Làm mới"
   },
   "loading": {
     "initializing": "Đang khởi tạo wiki...",
@@ -25,9 +26,13 @@
     "advancedVisualization": "Tùy chỉnh sơ đồ trực quan với Mermaid",
     "diagramDescription": "DeepWiki tự động tạo các sơ đồ tương tác giúp bạn hiểu cấu trúc source codes và mối quan hệ giữa chúng:",
     "flowDiagram": "Sơ đồ luồng",
-    "sequenceDiagram": "Sơ đồ tuần tự"
-}
-,
+    "sequenceDiagram": "Sơ đồ tuần tự",
+    "localRepos": "Repository cục bộ",
+    "availableRepos": "Repository khả dụng",
+    "noLocalRepos": "Không tìm thấy repository cục bộ nào",
+    "localReposDescription": "Đây là những repository được xử lý bởi DeepWiki và lưu trữ cục bộ trên máy của bạn. Nhấp vào một repository để xem tài liệu của nó.",
+    "files": "tệp"
+  },
   "form": {
     "repoPlaceholder": "owner/repo hoặc URL GitHub/GitLab/Bitbucket",
     "wikiLanguage": "Ngôn ngữ Wiki",
