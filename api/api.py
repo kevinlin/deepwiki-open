@@ -9,6 +9,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 import google.generativeai as genai
 import asyncio
+import pickle
 
 # Get a logger for this module
 logger = logging.getLogger(__name__)
@@ -61,6 +62,19 @@ class ProcessedProjectEntry(BaseModel):
     repo_type: str # Renamed from type to repo_type for clarity with existing models
     submittedAt: int # Timestamp
     language: str # Extracted from filename
+
+class ProjectModel(BaseModel):
+    """
+    Model for a project from the databases directory.
+    """
+    id: str  # Unique identifier (filename without extension)
+    name: str  # Project name derived from filename
+    path: str  # Path to the pickle file
+    repoPath: Optional[str] = None  # Path to the repo directory if available
+    repoUrl: Optional[str] = None  # Original repository URL if available
+    fileCount: int  # Number of files in the project
+    submittedAt: int  # Timestamp from file modification time
+    # sources: List[str] = []  # List of source file paths
 
 class WikiStructureModel(BaseModel):
     """
@@ -487,6 +501,10 @@ async def root():
                 "GET /api/wiki_cache - Retrieve cached wiki data",
                 "POST /api/wiki_cache - Store wiki data to cache"
             ],
+            "Projects": [
+                "GET /api/projects - Get all projects from local databases",
+                "GET /api/processed_projects - Get all processed wiki projects"
+            ],
             "LocalRepo": [
                 "GET /local_repo/structure - Get structure of a local repository (with path parameter)",
             ]
@@ -552,3 +570,84 @@ async def get_processed_projects():
     except Exception as e:
         logger.error(f"Error listing processed projects from {WIKI_CACHE_DIR}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to list processed projects from server cache.")
+
+# --- Projects API Endpoints ---
+
+@app.get("/api/projects", response_model=List[ProjectModel])
+async def get_projects():
+    """
+    Lists all projects found in the databases directory.
+    
+    Returns a list of projects with metadata that can be used to load the project locally.
+    """
+    project_entries: List[ProjectModel] = []
+    databases_dir = os.path.join(get_adalflow_default_root_path(), "databases")
+    repos_dir = os.path.join(get_adalflow_default_root_path(), "repos")
+
+    try:
+        if not os.path.exists(databases_dir):
+            logger.info(f"Databases directory {databases_dir} not found. Returning empty list.")
+            return []
+        
+        logger.info(f"Scanning for project database files in: {databases_dir}")
+        filenames = await asyncio.to_thread(os.listdir, databases_dir)
+
+        for filename in filenames:
+            if filename.endswith(".pkl"):
+                file_path = os.path.join(databases_dir, filename)
+                try:
+                    stats = await asyncio.to_thread(os.stat, file_path)
+                    project_id = filename.replace(".pkl", "")
+                    
+                    # Check if there's a corresponding repository directory
+                    repo_path = os.path.join(repos_dir, project_id)
+                    if not os.path.exists(repo_path):
+                        repo_path = None
+                    
+                    # Try to load the pickle file to get file count and repo URL
+                    file_count = 0
+                    repo_url = None
+                    try:
+                        with open(file_path, 'rb') as f:
+                            data = pickle.load(f)
+                            
+                            # Get file count from transformed items
+                            if hasattr(data, 'transformed_items') and 'split_and_embed' in data.transformed_items:
+                                file_count = len(data.transformed_items['split_and_embed'])
+                            elif hasattr(data, 'items'):
+                                file_count = len(data.items)
+                            
+                            # Extract repo URL from the first document with the repo_url metadata
+                            if hasattr(data, 'items') and len(data.items) > 0:
+                                for item in data.items:
+                                    if hasattr(item, 'meta_data') and 'repo_url' in item.meta_data:
+                                        repo_url = item.meta_data['repo_url']
+                                        break
+                    except Exception as e:
+                        logger.warning(f"Could not load pickle file {file_path}: {e}")
+                        # Continue with default values
+                    
+                    project_entries.append(
+                        ProjectModel(
+                            id=project_id,
+                            name=project_id,
+                            path=file_path,
+                            repoPath=repo_path,
+                            repoUrl=repo_url,
+                            fileCount=file_count,
+                            submittedAt=int(stats.st_mtime * 1000),  # Convert to milliseconds
+                            # sources=sources
+                        )
+                    )
+                except Exception as e:
+                    logger.error(f"Error processing file {file_path}: {e}")
+                    continue  # Skip this file on error
+
+        # Sort by most recent first
+        project_entries.sort(key=lambda p: p.submittedAt, reverse=True)
+        logger.info(f"Found {len(project_entries)} project entries.")
+        return project_entries
+
+    except Exception as e:
+        logger.error(f"Error listing projects from {databases_dir}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to list projects from databases directory.")

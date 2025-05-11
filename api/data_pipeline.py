@@ -115,7 +115,7 @@ def download_repo(repo_url: str, local_path: str, access_token: str = None):
 # Alias for backward compatibility
 download_github_repo = download_repo
 
-def read_all_documents(path: str, local_ollama: bool = False, excluded_dirs: List[str] = None, excluded_files: List[str] = None):
+def read_all_documents(path: str, local_ollama: bool = False, excluded_dirs: List[str] = None, excluded_files: List[str] = None, repo_url: str = None):
     """
     Recursively reads all documents in a directory and its subdirectories.
 
@@ -126,6 +126,7 @@ def read_all_documents(path: str, local_ollama: bool = False, excluded_dirs: Lis
             Overrides the default configuration if provided.
         excluded_files (List[str], optional): List of file patterns to exclude from processing.
             Overrides the default configuration if provided.
+        repo_url (str, optional): The original repository URL, if available.
 
     Returns:
         list: A list of Document objects with metadata.
@@ -180,16 +181,22 @@ def read_all_documents(path: str, local_ollama: bool = False, excluded_dirs: Lis
                         logger.warning(f"Skipping large file {relative_path}: Token count ({token_count}) exceeds limit")
                         continue
 
+                    meta_data = {
+                        "file_path": relative_path,
+                        "type": ext[1:],
+                        "is_code": True,
+                        "is_implementation": is_implementation,
+                        "title": relative_path,
+                        "token_count": token_count,
+                    }
+                    
+                    # Add repo_url to metadata if available
+                    if repo_url:
+                        meta_data["repo_url"] = repo_url
+
                     doc = Document(
                         text=content,
-                        meta_data={
-                            "file_path": relative_path,
-                            "type": ext[1:],
-                            "is_code": True,
-                            "is_implementation": is_implementation,
-                            "title": relative_path,
-                            "token_count": token_count,
-                        },
+                        meta_data=meta_data,
                     )
                     documents.append(doc)
             except Exception as e:
@@ -219,16 +226,22 @@ def read_all_documents(path: str, local_ollama: bool = False, excluded_dirs: Lis
                         logger.warning(f"Skipping large file {relative_path}: Token count ({token_count}) exceeds limit")
                         continue
 
+                    meta_data = {
+                        "file_path": relative_path,
+                        "type": ext[1:],
+                        "is_code": False,
+                        "is_implementation": False,
+                        "title": relative_path,
+                        "token_count": token_count,
+                    }
+                    
+                    # Add repo_url to metadata if available
+                    if repo_url:
+                        meta_data["repo_url"] = repo_url
+
                     doc = Document(
                         text=content,
-                        meta_data={
-                            "file_path": relative_path,
-                            "type": ext[1:],
-                            "is_code": False,
-                            "is_implementation": False,
-                            "title": relative_path,
-                            "token_count": token_count,
-                        },
+                        meta_data=meta_data,
                     )
                     documents.append(doc)
             except Exception as e:
@@ -671,6 +684,23 @@ class DatabaseManager:
             logger.info("Loading existing database...")
             try:
                 self.db = LocalDB.load_state(self.repo_paths["save_db_file"])
+                
+                # Check if we need to update database with repo_url
+                if self.repo_url_or_path and self.repo_url_or_path.startswith(("http://", "https://")):
+                    update_needed = False
+                    
+                    # Check if any document is missing repo_url
+                    if hasattr(self.db, "items") and len(self.db.items) > 0:
+                        for item in self.db.items:
+                            if hasattr(item, "meta_data") and "repo_url" not in item.meta_data:
+                                update_needed = True
+                                break
+                    
+                    if update_needed:
+                        logger.info(f"Updating database with repository URL: {self.repo_url_or_path}")
+                        # Create new database with repo_url included
+                        return self._create_new_database(local_ollama, excluded_dirs, excluded_files)
+                
                 documents = self.db.get_transformed_data(key="split_and_embed")
                 if documents:
                     logger.info(f"Loaded {len(documents)} documents from existing database")
@@ -679,13 +709,34 @@ class DatabaseManager:
                 logger.error(f"Error loading existing database: {e}")
                 # Continue to create a new database
 
-        # prepare the database
+        # Create new database
+        return self._create_new_database(local_ollama, excluded_dirs, excluded_files)
+
+    def _create_new_database(self, local_ollama: bool = False, excluded_dirs: List[str] = None, excluded_files: List[str] = None) -> List[Document]:
+        """
+        Creates a new database with the current repository.
+        
+        Args:
+            local_ollama (bool): Whether to use local Ollama for embedding
+            excluded_dirs (List[str], optional): List of directories to exclude from processing
+            excluded_files (List[str], optional): List of file patterns to exclude from processing
+            
+        Returns:
+            List[Document]: List of transformed Document objects
+        """
         logger.info("Creating new database...")
+        
+        # Pass the repo URL to read_all_documents if it's a remote URL
+        repo_url = None
+        if self.repo_url_or_path and self.repo_url_or_path.startswith(("http://", "https://")):
+            repo_url = self.repo_url_or_path
+        
         documents = read_all_documents(
             self.repo_paths["save_repo_dir"], 
             local_ollama=local_ollama,
             excluded_dirs=excluded_dirs,
-            excluded_files=excluded_files
+            excluded_files=excluded_files,
+            repo_url=repo_url
         )
         self.db = transform_documents_and_save_to_db(
             documents, self.repo_paths["save_db_file"], local_ollama=local_ollama
