@@ -69,6 +69,22 @@ const wikiStyles = `
   .prose td {
     @apply p-2 border border-[var(--border-color)];
   }
+
+  /* Animation for footer */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+  }
 `;
 
 // Helper functions for token handling and API requests
@@ -240,6 +256,9 @@ export default function RepoWikiPage() {
 
   // State for Ask section visibility
   const [isAskSectionVisible, setIsAskSectionVisible] = useState(true);
+
+  // Add useState for showFooter at the top of the component
+  const [showFooter, setShowFooter] = useState(false);
 
   // Memoize repo info to avoid triggering updates in callbacks
 
@@ -1571,6 +1590,31 @@ IMPORTANT:
       </main>
 
       <footer className="max-w-6xl mx-auto mt-8 flex flex-col gap-4 w-full">
+        <div className="flex justify-end">
+          <button 
+            onClick={() => setShowFooter(!showFooter)} 
+            className="text-xs text-[var(--muted)] hover:text-[var(--accent-primary)] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--card-bg)] border border-[var(--border-color)] shadow-sm transition-colors hover:border-[var(--accent-primary)]/30 fixed bottom-4 right-4 z-10"
+            aria-expanded={showFooter}
+            aria-label={showFooter ? messages.footer?.hideFooter : messages.footer?.showFooter}
+          >
+            {showFooter ? messages.footer?.hideFooter : messages.footer?.showFooter}
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="12" 
+              height="12" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className={`transition-transform duration-300 ${showFooter ? 'rotate-180' : ''}`}
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+        
         {/* Only show Ask component when wiki is successfully generated */}
         {wikiStructure && Object.keys(generatedPages).length > 0 && !isLoading && (
           <div className="w-full bg-[var(--card-bg)] rounded-lg p-5 mb-4 shadow-custom card-japanese">
@@ -1605,12 +1649,18 @@ IMPORTANT:
             )}
           </div>
         )}
-        <div className="flex justify-between items-center gap-4 text-center text-[var(--muted)] text-sm h-fit w-full bg-[var(--card-bg)] rounded-lg p-3 shadow-sm border border-[var(--border-color)]">
-          <p className="flex-1 font-serif">
-            {messages.footer?.copyright || 'DeepWiki - Generate Wiki from GitHub/Gitlab/Bitbucket repositories'}
-          </p>
-          <ThemeToggle />
-        </div>
+        
+        {showFooter && (
+          <div
+            className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[var(--card-bg)] rounded-lg p-4 border border-[var(--border-color)] shadow-custom animate-fadeIn"
+          >
+            <p className="text-[var(--muted)] text-sm font-serif">
+              {messages.footer?.copyright || 'DeepWiki - AI-powered documentation for code repositories'}
+            </p>
+
+            <ThemeToggle/>
+          </div>
+        )}
       </footer>
 
       <ModelSelectionModal
